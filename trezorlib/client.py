@@ -31,6 +31,13 @@ import getpass
 from mnemonic import Mnemonic
 
 from . import tools
+
+# monkeypatching: handle None in message constructors in old libprotobuf
+tools.monkeypatch_google_protobuf_addinitmethod()
+
+# monkeypatching: text formatting of protobuf messages
+tools.monkeypatch_google_protobuf_text_format()
+
 # from . import mapping
 from . import messages_pb2 as proto
 from . import types_pb2 as types
@@ -52,9 +59,6 @@ except NameError:
 SCREENSHOT = False
 
 DEFAULT_CURVE = 'secp256k1'
-
-# monkeypatching: text formatting of protobuf messages
-tools.monkeypatch_google_protobuf_text_format()
 
 
 def getch():

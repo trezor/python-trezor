@@ -136,3 +136,26 @@ def monkeypatch_google_protobuf_text_format():
             _oldPrintFieldValue(field, value, out, indent, as_utf8, as_one_line)
 
     google.protobuf.text_format.PrintFieldValue = _customPrintFieldValue
+
+
+def monkeypatch_google_protobuf_addinitmethod():
+    import google.protobuf
+
+    # __version__ was added in the same release as None support in message constructors
+    if not hasattr(google.protobuf, "__version__"):
+        from google.protobuf.internal import python_message
+
+        _AddInitMethod = python_message._AddInitMethod
+
+        def AddInitMethod(message_descriptor, cls):
+            _AddInitMethod(message_descriptor, cls)
+
+            _init = cls.__init__
+
+            def init(self, **kwargs):
+                _kwargs = dict((k, v) for (k, v) in kwargs.items() if v is not None)
+                _init(self, **_kwargs)
+
+            cls.__init__ = init
+
+        python_message._AddInitMethod = AddInitMethod
