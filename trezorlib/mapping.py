@@ -84,6 +84,7 @@ AdapterDefinition = Union[
 AdapterDict = Dict[str, 'AdapterDefinition']
 AdapterType = TypeVar('AdapterType', bound=protobuf.MessageType)
 
+
 class ProtoAdapter:
 
     BYTES_NOCONVERSION = 0
@@ -147,13 +148,19 @@ class ProtoAdapter:
         processors = {}
 
         for name, (typeinfo, repeated) in fields.items():
-            hint = hints.get(name, name)
+            if name in hints:
+                hint = hints[name]
+            elif repeated:
+                # can't auto-copy repeating fields
+                hint = None
+            elif isinstance(typeinfo, protobuf.MessageType):
+                # missing hint for MessageType - auto adapt structure
+                hint = (name, {})
+            else:
+                # missing hint for primitive type - auto adapt field
+                hint = name
 
-            # can't auto-copy repeating fields. doesn't work
-            if repeated and name not in hints:
-                action = None
-
-            elif hint is None:
+            if hint is None:
                 action = None
 
             elif isinstance(hint, str):
@@ -229,7 +236,7 @@ class ProtoAdapter:
             return bool(value)
 
         elif typeinfo is protobuf.BytesType:
-            if not isinstance(value, (str,bytes)):
+            if not isinstance(value, (str, bytes)):
                 raise AdapterError('Expected str or bytes as a value for "{}", got {}'.format(name, type(value)))
             # todo conversion options
             return binascii.unhexlify(value)
