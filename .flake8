@@ -20,8 +20,6 @@ ignore =
     E402,
     # E501: line too long
     E501,
-    # E721: do not compare types, use 'isinstance()'
-    E721,
     # E722: do not use bare except
     E722,
     # E741: ambiguous variable name
