@@ -100,7 +100,6 @@ def wipe(client):
     return ret
 
 
-@expect(proto.Success, field="message")
 def recover(
     client,
     word_count=24,
@@ -165,6 +164,7 @@ def reset(
     u2f_counter=0,
     skip_backup=False,
     no_backup=False,
+    slip39=False,
 ):
     if client.features.initialized:
         raise RuntimeError(
@@ -188,6 +188,7 @@ def reset(
         u2f_counter=u2f_counter,
         skip_backup=bool(skip_backup),
         no_backup=bool(no_backup),
+        slip39=bool(slip39),
     )
 
     resp = client.call(msg)

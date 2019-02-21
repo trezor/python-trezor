@@ -465,7 +465,7 @@ def recovery_device(
         input_callback = ui.matrix_words
         click.echo(ui.RECOVERY_MATRIX_DESCRIPTION)
 
-    return device.recover(
+    result = device.recover(
         connect(),
         word_count=int(words),
         passphrase_protection=passphrase_protection,
@@ -476,6 +476,10 @@ def recovery_device(
         type=rec_type,
         dry_run=dry_run,
     )
+    if isinstance(result, proto.Success):
+        return result.message
+    elif isinstance(result, proto.RecoveryDeviceInProgress):
+        return "Multi-step recovery process. Run recovery_device again to enter another mnemonic."
 
 
 @cli.command(help="Perform device setup and generate new seed.")
@@ -487,6 +491,7 @@ def recovery_device(
 @click.option("-u", "--u2f-counter", default=0)
 @click.option("-s", "--skip-backup", is_flag=True)
 @click.option("-n", "--no-backup", is_flag=True)
+@click.option("-x", "--slip39", is_flag=True)
 @click.pass_obj
 def reset_device(
     connect,
@@ -498,6 +503,7 @@ def reset_device(
     u2f_counter,
     skip_backup,
     no_backup,
+    slip39,
 ):
     if strength:
         strength = int(strength)
@@ -512,6 +518,7 @@ def reset_device(
         u2f_counter=u2f_counter,
         skip_backup=skip_backup,
         no_backup=no_backup,
+        slip39=slip39,
     )
 
 
